@@ -28,14 +28,13 @@ parser.add_argument('--female', dest='male', action='store_false')
 parser.add_argument('--voice-number', type=int, default=1)
 parser.add_argument('--led', help="Type of LED for example max7219", default=None)
 parser.add_argument('--ledrotate', help="Rotates the LED matrix. Example: 180", default=None)
-parser.add_argument('--tts-volume', type=int, default=80)
+parser.add_argument('--tts-volume', type=int, default=180)
 parser.add_argument('--secret-key', default=None)
 parser.add_argument('--turn-delay', type=float, default=0.4)
 parser.add_argument('--straight-delay', type=float, default=0.5)
 parser.add_argument('--driving-speed', type=int, default=90)
 parser.add_argument('--day-speed', type=int, default=255)
 parser.add_argument('--night-speed', type=int, default=255)
-parser.add_argument('--turning-speed', type=int, default=250)
 parser.add_argument('--forward', default='[-1,1,-1,1]')
 parser.add_argument('--left', default='[1,1,1,1]')
 parser.add_argument('--festival-tts', dest='festival_tts', action='store_true')
@@ -111,6 +110,8 @@ elif commandArgs.type == 'serial':
     import serial
 elif commandArgs.type == 'motor_hat':
     pass
+elif commandArgs.type == 'mebo2':
+    from mebo.handle_mebo_command import handle_mebo_command
 elif commandArgs.type == 'gopigo2':
     import gopigo
 elif commandArgs.type == 'gopigo3':
@@ -373,7 +374,8 @@ drivingSpeed = commandArgs.driving_speed
 handlingCommand = False
 
 
-turningSpeedActuallyUsed = commandArgs.turning_speed
+# Marvin
+turningSpeedActuallyUsed = 250
 dayTimeDrivingSpeedActuallyUsed = commandArgs.day_speed
 nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
 
@@ -651,10 +653,25 @@ def handle_exclusive_control(args):
         if status == 'end':
                 print "end exclusive control"
 
+_message_queue=[]
+def say_first_in_queue():
+    message=_message_queue[0]
+    for word in message.split(' '):
+        os.system('espeak -s 120 "'+word+'" -w /tmp/robot_speak.wav')
+        os.system('ffmpeg -i /tmp/robot_speak.wav -vol 1000 -f alaw -ar 8000 udp://192.168.99.1:8828?connect=1')
+        #time.sleep(len(word)*0.03)
+        time.sleep(0.2)
+    _message_queue.pop(0)
+    if(len(_message_queue)>0):
+        say_first_in_queue()
+    
 
-                
 def say(message):
-
+    _message_queue.append(message) 
+    if(len(_message_queue)==1):
+        say_first_in_queue()
+    
+    return
     tempFilePath = os.path.join(tempDir, "text_" + str(uuid.uuid4()))
     f = open(tempFilePath, "w")
     f.write(message)
@@ -961,7 +978,10 @@ def handle_command(args):
                     moveMDD10(command, int(float(drivingSpeedActuallyUsed) / 2.55))                
 			
             if commandArgs.type == 'adafruit_pwm':
-                moveAdafruitPWM(command)
+                moveAdafruitPWM(command)                
+			
+            if commandArgs.type == 'mebo2':
+                handle_mebo_command(command)
             
             if commandArgs.type == 'gopigo2':
                 moveGoPiGo2(command)
@@ -980,9 +1000,8 @@ def handle_command(args):
                     setup_serial()
 
             if commandArgs.type == 'motor_hat' and motorsEnabled:
-                for motorIndex in range(4):
-                    mh.getMotor(motorIndex).setSpeed(drivingSpeed)
-
+                motorA.setSpeed(drivingSpeed)
+                motorB.setSpeed(drivingSpeed)
                 if command == 'F':
                     drivingSpeed = drivingSpeedActuallyUsed
                     for motorIndex in range(4):
@@ -1344,6 +1363,8 @@ def turnOffMotorsMDD10():
 if commandArgs.type == 'motor_hat':
     if motorsEnabled:
         atexit.register(turnOffMotors)
+        motorA = mh.getMotor(1)
+        motorB = mh.getMotor(2)
 
 def ipInfoUpdate():
     appServerSocketIO.emit('ip_information',

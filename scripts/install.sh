@@ -49,8 +49,8 @@ cat > start_robot <<EOF
 # (1) Put in the ids for your robot, YOURROBOTID and YOURCAMERAID
 # (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot
 cd /home/pi/runmyrobot
-nohup scripts/repeat_start python controller.py ${input_robot} --type serial --serial-device /dev/ttyUSB0 &> /dev/null &
-nohup scripts/repeat_start python send_video.py ${input_camera} 0 --mic-channels 2 --audio-device-name C920 --pipe-audio &> /dev/null &
+nohup scripts/repeat_start python controller.py ${input_robot} --type mebo2 &> /dev/null &
+nohup scripts/repeat_start python send_video.py ${input_camera} 0 --kbps 2000 &> /dev/null &
 EOF
 
 # Make sure the system is up to date
@@ -59,8 +59,8 @@ sudo apt-get -y update
 # Start installing everything needed
 sudo apt-get -y install ffmpeg python-serial python-dev libgnutls28-dev espeak python-smbus python-pip git
 
-#clone runmyrobot repo
-git clone https://github.com/runmyrobot/runmyrobot
+#clone meborobot repo
+git clone https://github.com/meborobot/runmyrobot
 
 #install python prereqs
 cd runmyrobot/

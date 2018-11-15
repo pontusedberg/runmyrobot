@@ -1,3 +1,4 @@
+import urllib2
 import subprocess
 import shlex
 import re
@@ -15,7 +16,6 @@ import thread
 import copy
 import argparse
 import audio_util
-
 
 class DummyProcess:
     def poll(self):
@@ -145,8 +145,6 @@ def randomSleep():
     print "sleeping", timeToWait
     time.sleep(timeToWait)
 
-
-
 def startVideoCaptureLinux():
 
     videoPort = getVideoPort()
@@ -156,7 +154,9 @@ def startVideoCaptureLinux():
     print "websocket relay host for video:", websocketRelayHost
 
     videoHost = websocketRelayHost['host']
-
+    
+    audioPort = getAudioPort()
+    audioHost = websocketRelayHost['host']
 
     # set brightness
     if (robotSettings.brightness is not None):
@@ -173,8 +173,12 @@ def startVideoCaptureLinux():
         print "saturation"
         os.system("v4l2-ctl -c saturation={saturation}".format(saturation=robotSettings.saturation))
 
-    videoCommandLine1 = '/usr/local/bin/ffmpeg -f v4l2 -threads 4 -video_size {xres}x{yres} -i /dev/video{video_device_number} {rotation_option} -f mpegts -framerate 25 -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
-    videoCommandLine2 = 'ffmpeg -f v4l2 -threads 4 -video_size {xres}x{yres} -i /dev/video{video_device_number} {rotation_option} -f mpegts -framerate 25 -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    # Original
+    videoCommandLine1 = '/usr/local/bin/ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2 {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    videoCommandLine2 = 'ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2  {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+
+    #videoCommandLine2 = 'ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2 {rotation_option} -an -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/ -vn -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 -map_metadata -1 -ar 44100 http:/{audio_host}:{audio_port}/{stream_key}/640/480/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key, audio_host=audioHost, audio_port=audioPort)
+    
     try:
         subprocess.Popen("ffmpeg")
 	print "ffmpeg found at ffmpeg"
@@ -198,27 +202,9 @@ def startAudioCaptureLinux():
     if robotSettings.audio_device_name is not None:
 	audioDevNum = audio_util.getAudioDeviceByName(robotSettings.audio_device_name)
 
-    ffmpegLocation = ''
-    try:
-        subprocess.Popen("ffmpeg")
-	print "ffmpeg found at ffmpeg"
-	ffmpegLocation = 'ffmpeg'
-    except:
-        print "ffmpeg not found at ffmpeg"
-        try:
-            subprocess.Popen("/usr/local/bin/ffmpeg")
-	    print "ffmpeg found at /usr/local/bin/ffmpeg"
-	    ffmpegLocation = '/usr/local/bin/ffmpeg'
-        except:
-            print "ffmpeg not found at /usr/local/bin/ffmpeg"
-    audioCommandLine1 = '%s -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (ffmpegLocation, robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
-    audioCommandLine2 = 'arecord -D hw:%d -c %d -f S16_LE -r 32000 | %s -i - -ar 32000 -threads 4 -f mpegts -codec:a mp2 -b:a 128k -bufsize 8192k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (audioDevNum, robotSettings.mic_channels, ffmpegLocation, audioHost, audioPort, robotSettings.stream_key)
-    if robotSettings.arecord:
-        print audioCommandLine1
-        return subprocess.Popen(shlex.split(audioCommandLine1))
-    else:
-        print audioCommandLine2
-        return subprocess.Popen(audioCommandLine2, shell=True)
+    audioCommandLine = 'ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
+    
+    return subprocess.Popen(shlex.split(audioCommandLine))
 
 
 def rotationOption():
@@ -316,7 +302,12 @@ def refreshFromOnlineSettings():
     else:
         print "NOT KILLING***********************"
 
-    
+def isMeboConnected():
+    try:
+        urllib2.urlopen('http://192.168.99.1/ajax/command.json', timeout=5)
+        return True
+    except urllib2.URLError as err:
+        return False
     
 def main():
 
@@ -379,18 +370,19 @@ def main():
         appServerSocketIO.wait(seconds=1)
 
 
-
         # todo: note about the following ffmpeg_process_exists is not technically true, but need to update
         # server code to check for send_video_process_exists if you want to set it technically accurate
         # because the process doesn't always exist, like when the relay is not started yet.
         # send status to server
-        appServerSocketIO.emit('send_video_status', {'send_video_process_exists': True,
-                                            'ffmpeg_process_exists': True,
-                                            'camera_id':commandArgs.camera_id})
 
-        
-
-        
+        if count % 5 == 0:
+            if isMeboConnected() == True:
+                print "Mebo online, sending video status..."
+                appServerSocketIO.emit('send_video_status', {'send_video_process_exists': True,
+                    'ffmpeg_process_exists': True,
+                    'camera_id':commandArgs.camera_id})
+            if isMeboConnected() == False:
+                print "Mebo offline, not sending video status..."
         if numVideoRestarts > 100:
             time.sleep(20)
             os.system("sudo reboot")
