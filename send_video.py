@@ -265,9 +265,6 @@ def refreshFromOnlineSettings():
 
     if not robotSettings.mic_enabled:
         print "KILLING**********************"
-        if audioProcess is not None:
-            print "KILLING**********************"
-            audioProcess.kill()
 
     if resolutionChanged:
         print "KILLING VIDEO DUE TO RESOLUTION CHANGE**********************"
@@ -359,7 +356,6 @@ def main():
                 with os.fdopen(os.open('/tmp/send_video_summary.txt', os.O_WRONLY | os.O_CREAT, 0o777), 'w') as statusFile:
                     statusFile.write("time" + str(datetime.datetime.now()) + "\n")
                     statusFile.write("video process poll " + str(videoProcess.poll()) + " pid " + str(videoProcess.pid) + " restarts " + str(numVideoRestarts) + " \n")
-                    statusFile.write("audio process poll " + str(audioProcess.poll()) + " pid " + str(audioProcess.pid) + " restarts " + str(numAudioRestarts) + " \n")
                 print "status file written"
                 sys.stdout.flush()
             except:
