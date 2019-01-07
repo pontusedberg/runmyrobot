@@ -381,8 +381,6 @@ def main():
                 numVideoRestarts += 1
         else:
             print "video process poll: camera_enabled is false"
-        else:
-            print "audio process poll: mic_enabled is false"
 
         
         count += 1
