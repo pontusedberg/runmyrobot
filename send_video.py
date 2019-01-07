@@ -147,64 +147,40 @@ def randomSleep():
 
 def startVideoCaptureLinux():
 
-    videoPort = getVideoPort()
-    print "getting websocket relay host for video"
+    print "getting websocket relay host for video and audio"
     websocketRelayHost = getWebsocketRelayHost()
 
-    print "websocket relay host for video:", websocketRelayHost
+    print "websocket relay host for video and audio:", websocketRelayHost
 
     videoHost = websocketRelayHost['host']
-    
-    audioPort = getAudioPort()
+    videoPort = getVideoPort()
     audioHost = websocketRelayHost['host']
-
-    # set brightness
-    if (robotSettings.brightness is not None):
-        print "brightness"
-        os.system("v4l2-ctl -c brightness={brightness}".format(brightness=robotSettings.brightness))
-
-    # set contrast
-    if (robotSettings.contrast is not None):
-        print "contrast"
-        os.system("v4l2-ctl -c contrast={contrast}".format(contrast=robotSettings.contrast))
-
-    # set saturation
-    if (robotSettings.saturation is not None):
-        print "saturation"
-        os.system("v4l2-ctl -c saturation={saturation}".format(saturation=robotSettings.saturation))
+    audioPort = getAudioPort()
 
     # Original
     videoCommandLine1 = '/usr/local/bin/ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2 {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
     videoCommandLine2 = 'ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2  {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
 
-    #videoCommandLine2 = 'ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2 {rotation_option} -an -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/ -vn -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 -map_metadata -1 -ar 44100 http:/{audio_host}:{audio_port}/{stream_key}/640/480/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key, audio_host=audioHost, audio_port=audioPort)
-    
+    ffmpegFound = 'ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2 \
+-codec:v mpeg1video -an -f mpegts -b:v 1000k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{streamkey}/640/480/ \
+-codec:a mp2 -vn -ar 44100 -ac 1 -f mpegts -b:a 32k -muxdelay 0.001 http://{audio_host}:{audio_port}/{streamkey2}/640/480/'.format(video_host=videoHost, video_port=videoPort, stream_key=robotSettings.stream_key, audio_host=audioHost, audio_port=audioPort, stream_key2=robotSettings.stream_key)
+
+    ffmpegNotFound = '/usr/bin/ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2 \
+-codec:v mpeg1video -an -f mpegts -b:v 1000k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{streamkey}/640/480/ \
+-codec:a mp2 -vn -ar 44100 -ac 1 -f mpegts -b:a 32k -muxdelay 0.001 http://{audio_host}:{audio_port}/{streamkey2}/640/480/'.format(video_host=videoHost, video_port=videoPort, stream_key=robotSettings.stream_key, audio_host=audioHost, audio_port=audioPort, stream_key2=robotSettings.stream_key)
+
     try:
         subprocess.Popen("ffmpeg")
 	print "ffmpeg found at ffmpeg"
-	return subprocess.Popen(shlex.split(videoCommandLine2))
+	return subprocess.Popen(shlex.split(ffmpegFound))
     except:
         print "ffmpeg not found at ffmpeg"
         try:
             subprocess.Popen("/usr/local/bin/ffmpeg")
 	    print "ffmpeg found at /usr/local/bin/ffmpeg"
-	    return subprocess.Popen(shlex.split(videoCommandLine1))
+	    return subprocess.Popen(shlex.split(ffmpegNotFound))
         except:
             print "ffmpeg not found at /usr/local/bin/ffmpeg"
-    
-
-def startAudioCaptureLinux():
-
-    audioPort = getAudioPort()
-    websocketRelayHost = getWebsocketRelayHost()
-    audioHost = websocketRelayHost['host']
-    audioDevNum = robotSettings.audio_device_number
-    if robotSettings.audio_device_name is not None:
-	audioDevNum = audio_util.getAudioDeviceByName(robotSettings.audio_device_name)
-
-    audioCommandLine = 'ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
-    
-    return subprocess.Popen(shlex.split(audioCommandLine))
 
 
 def rotationOption():
@@ -347,17 +323,8 @@ def main():
         else:
             videoProcess = DummyProcess()
 
-    if robotSettings.mic_enabled:
-        if not commandArgs.dry_run:
-            audioProcess = startAudioCaptureLinux()
-            thread.start_new_thread(killallFFMPEGIn30Seconds, ())
-            #appServerSocketIO.emit('send_video_process_start_event', {'camera_id': commandArgs.camera_id})
-        else:
-            audioProcess = DummyProcess()
-
 
     numVideoRestarts = 0
-    numAudioRestarts = 0
 
     count = 0
 
@@ -414,23 +381,6 @@ def main():
                 numVideoRestarts += 1
         else:
             print "video process poll: camera_enabled is false"
-            
-
-                
-        if robotSettings.mic_enabled:
-
-            if audioProcess is None:
-                print "audio process poll: audioProcess object is None"
-            else:
-                print "audio process poll", audioProcess.poll(), "pid", audioProcess.pid, "restarts", numAudioRestarts
-
-            # restart audio if needed
-            if (audioProcess is None) or (audioProcess.poll() != None):
-                randomSleep()
-                audioProcess = startAudioCaptureLinux()
-                #time.sleep(30)
-                #appServerSocketIO.emit('send_video_process_start_event', {'camera_id': commandArgs.camera_id})               
-                numAudioRestarts += 1
         else:
             print "audio process poll: mic_enabled is false"
 
