@@ -52,6 +52,7 @@ def handle_mebo_command(command):
         
         print "sending GET request to: " + str(mebo_constants.MEBO_IP_ADDRESSE) + "/ajax/command.json" + mebo_command
         conn.request("GET","/ajax/command.json" + mebo_command)
+        print "AA - " + mebo_command
         res = conn.getresponse()
         print(res.status, res.reason)
     
@@ -59,6 +60,7 @@ def handle_mebo_command(command):
     
         print "sending GET request to: " + str(mebo_constants.MEBO_IP_ADDRESSE) + "/ajax/command.json" + mebo_command_stop
         conn.request("GET","/ajax/command.json" + mebo_command_stop)
+        print "AB - " + mebo_command_stop
         res = conn.getresponse()
         print(res.status, res.reason)
     except (httplib.HTTPException, socket.error) as ex:
