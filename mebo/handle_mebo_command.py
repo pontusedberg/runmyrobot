@@ -50,17 +50,15 @@ def handle_mebo_command(command):
     try:
         conn = httplib.HTTPConnection(mebo_constants.MEBO_IP_ADDRESSE)
         
-        print "sending GET request to: " + str(mebo_constants.MEBO_IP_ADDRESSE) + "/ajax/command.json" + mebo_command
+        print "\nSTART - sending GET request to: " + str(mebo_constants.MEBO_IP_ADDRESSE) + "/ajax/command.json" + mebo_command + "\n"
         conn.request("GET","/ajax/command.json" + mebo_command)
-        print "AA - " + mebo_command
         res = conn.getresponse()
         print(res.status, res.reason)
     
         time.sleep(mebo_constants.COMMAND_DURATION)
     
-        print "sending GET request to: " + str(mebo_constants.MEBO_IP_ADDRESSE) + "/ajax/command.json" + mebo_command_stop
+        print "\nSTOP - sending GET request to: " + str(mebo_constants.MEBO_IP_ADDRESSE) + "/ajax/command.json" + mebo_command_stop + "\n"
         conn.request("GET","/ajax/command.json" + mebo_command_stop)
-        print "AB - " + mebo_command_stop
         res = conn.getresponse()
         print(res.status, res.reason)
     except (httplib.HTTPException, socket.error) as ex:
