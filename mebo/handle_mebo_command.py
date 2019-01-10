@@ -22,7 +22,7 @@ def handle_speed(command, speed):
     
     mebo_command = converter.convert({
         "command": command,
-        "parameter": letsrobot_to_param_lookup[LetsrobotCommands(command)]
+        "parameter": 0
     })
 
     mebo_command_stop = converter.convert({
