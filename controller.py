@@ -1024,8 +1024,7 @@ def handle_command(args):
                 if command == 'TD':
                     incrementTSpeed(-10)
                     time.sleep(0.05)
-                if command != 'SI' or command != 'SD' or command != 'TI' or command != 'TD':
-                    handle_mebo_command(command)
+                handle_mebo_command(command)
             
             if commandArgs.type == 'gopigo2':
                 moveGoPiGo2(command)
