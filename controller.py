@@ -910,13 +910,13 @@ def moveGoPiGo3(command):
 meboMSpeedDict = {
 	'current':50,
 	'home':50,
-	'max': 150, #up
+	'max': 100, #up
 	'min': 25 #down
 }
 meboTSpeedDict = {
 	'current':50,
 	'home':50,
-	'max': 150, #up
+	'max': 100, #up
 	'min': 25 #down
 }
 
@@ -1012,23 +1012,18 @@ def handle_command(args):
                 moveAdafruitPWM(command)                
 			
             if commandArgs.type == 'mebo2':
-                if command == 'S+':
+                if command == 'SI':
                     incrementMSpeed(10)
                     time.sleep(0.05)
-                    return
-                if command == 'S-':
+                if command == 'SD':
                     incrementMSpeed(-10)
                     time.sleep(0.05)
-                    return
-                if command == 'T+':
+                if command == 'TI':
                     incrementTSpeed(10)
                     time.sleep(0.05)
-                    return
-                    return
-                if command == 'T-':
+                if command == 'TD':
                     incrementTSpeed(-10)
                     time.sleep(0.05)
-                    return
                 handle_mebo_command(command)
             
             if commandArgs.type == 'gopigo2':
