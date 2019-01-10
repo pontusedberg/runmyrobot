@@ -16,6 +16,7 @@ import thread
 import copy
 import argparse
 import audio_util
+import mebo.mebo_constants as mebo_constants
 
 class DummyProcess:
     def poll(self):
@@ -158,14 +159,14 @@ def startVideoCaptureLinux():
     audioPort = getAudioPort()
 
     # Original
-    videoCommandLine1 = '/usr/local/bin/ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2 {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
-    videoCommandLine2 = 'ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2  {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    videoCommandLine1 = '/usr/local/bin/ffmpeg -r 25 -i rtsp://stream:video@'+str(mebo_constants.MEBO_IP_ADDRESSE)+':554/media/stream2 {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    videoCommandLine2 = 'ffmpeg -r 25 -i rtsp://stream:video@'+str(mebo_constants.MEBO_IP_ADDRESSE)+':554/media/stream2  {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
 
-    ffmpegFound = 'ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2 \
+    ffmpegFound = 'ffmpeg -r 25 -i rtsp://stream:video@'+str(mebo_constants.MEBO_IP_ADDRESSE)+':554/media/stream2 \
 -codec:v mpeg1video -an -f mpegts -b:v 1000k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/ \
 -codec:a mp2 -vn -ar 44100 -ac 1 -f mpegts -b:a 32k -muxdelay 0.001 http://{audio_host}:{audio_port}/{stream_key2}/640/480/'.format(video_host=videoHost, video_port=videoPort, stream_key=robotSettings.stream_key, audio_host=audioHost, audio_port=audioPort, stream_key2=robotSettings.stream_key)
 
-    ffmpegNotFound = '/usr/bin/ffmpeg -r 25 -i rtsp://stream:video@192.168.99.1:554/media/stream2 \
+    ffmpegNotFound = '/usr/bin/ffmpeg -r 25 -i rtsp://stream:video@'+str(mebo_constants.MEBO_IP_ADDRESSE)+':554/media/stream2 \
 -codec:v mpeg1video -an -f mpegts -b:v 1000k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/640/480/ \
 -codec:a mp2 -vn -ar 44100 -ac 1 -f mpegts -b:a 32k -muxdelay 0.001 http://{audio_host}:{audio_port}/{stream_key2}/640/480/'.format(video_host=videoHost, video_port=videoPort, stream_key=robotSettings.stream_key, audio_host=audioHost, audio_port=audioPort, stream_key2=robotSettings.stream_key)
 
