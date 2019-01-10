@@ -61,6 +61,14 @@ def handle_mebo_command(command):
     
     if command == "stop":
         return
+    if command == "SI":
+        return
+    if command == "SD":
+        return
+    if command == "TI":
+        return
+    if command == "TD":
+        return
 
     mebo_command = converter.convert({
         "command": command,
