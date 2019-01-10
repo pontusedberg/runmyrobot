@@ -9,23 +9,13 @@ converter = LetsRobotToMeboConverter()
 def handle_speed(command, speed):
     command = command.encode('ascii','ignore')
 
-    if command == "S+":
-        print "increasing movement speed"
+    if command == "S":
+        print "setting speed"
         letsrobot_to_param_lookup[LetsrobotCommands.F] = speed
         letsrobot_to_param_lookup[LetsrobotCommands.B] = speed
         return
-    if command == "S-":
-        print "decreasing movement speed"
-        letsrobot_to_param_lookup[LetsrobotCommands.F] = speed
-        letsrobot_to_param_lookup[LetsrobotCommands.B] = speed
-        return
-    if command == "T+":
-        print "increasing turning speed"
-        letsrobot_to_param_lookup[LetsrobotCommands.L] = speed
-        letsrobot_to_param_lookup[LetsrobotCommands.R] = speed
-        return
-    if command == "T-":
-        print "decreasing turning speed"
+    if command == "T":
+        print "setting turning"
         letsrobot_to_param_lookup[LetsrobotCommands.L] = speed
         letsrobot_to_param_lookup[LetsrobotCommands.R] = speed
         return
@@ -72,27 +62,6 @@ def handle_mebo_command(command):
     if command == "stop":
         return
 
-    if command == "S+":
-        print "increasing movement speed"
-        letsrobot_to_param_lookup[LetsrobotCommands.L] = mebo_constants.TURNINGSPEEDS1
-        letsrobot_to_param_lookup[LetsrobotCommands.R] = mebo_constants.TURNINGSPEEDS1
-        return
-    if command == "S-":
-        print "decreasing movement speed"
-        letsrobot_to_param_lookup[LetsrobotCommands.L] = mebo_constants.TURNINGSPEEDS2
-        letsrobot_to_param_lookup[LetsrobotCommands.R] = mebo_constants.TURNINGSPEEDS2
-        return
-    if command == "T+":
-        print "increasing turning speed"
-        letsrobot_to_param_lookup[LetsrobotCommands.L] = mebo_constants.TURNINGSPEEDS3
-        letsrobot_to_param_lookup[LetsrobotCommands.R] = mebo_constants.TURNINGSPEEDS3
-        return
-    if command == "T-":
-        print "decreasing turning speed"
-        letsrobot_to_param_lookup[LetsrobotCommands.L] = mebo_constants.TURNINGSPEEDS3
-        letsrobot_to_param_lookup[LetsrobotCommands.R] = mebo_constants.TURNINGSPEEDS3
-        return
-    
     mebo_command = converter.convert({
         "command": command,
         "parameter": letsrobot_to_param_lookup[LetsrobotCommands(command)]
