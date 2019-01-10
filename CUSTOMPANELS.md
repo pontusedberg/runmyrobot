@@ -68,19 +68,23 @@
    {
       "button_panels":[
          {
-            "button_panel_label":"Turningspeed",
+            "button_panel_label":"Speeds",
             "buttons":[
                {
-                  "label":"Turningspeed 50",
-                  "command":"S3"
+                  "label":"Speed+",
+                  "command":"S+"
                },
                {
-                  "label":"Turningspeed 25",
-                  "command":"S2"
+                  "label":"Speed-",
+                  "command":"S-"
                },
                {
-                  "label":"Turningspeed 10",
-                  "command":"S1"
+                  "label":"Turningspeed+",
+                  "command":"T+"
+               },
+               {
+                  "label":"Turningspeed-",
+                  "command":"T-"
                }
             ]
          }
