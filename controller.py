@@ -1019,10 +1019,10 @@ def handle_command(args):
                     incrementMSpeed(-10)
                     time.sleep(0.05)
                 if command == 'T+':
-                    incrementMSpeed(10)
+                    incrementTSpeed(10)
                     time.sleep(0.05)
                 if command == 'T-':
-                    incrementMSpeed(-10)
+                    incrementTSpeed(-10)
                     time.sleep(0.05)
                 handle_mebo_command(command)
             
