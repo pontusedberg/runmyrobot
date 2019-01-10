@@ -72,19 +72,19 @@
             "buttons":[
                {
                   "label":"Speed+",
-                  "command":"S+"
+                  "command":"SI"
                },
                {
                   "label":"Speed-",
-                  "command":"S-"
+                  "command":"SD"
                },
                {
                   "label":"Turningspeed+",
-                  "command":"T+"
+                  "command":"TI"
                },
                {
                   "label":"Turningspeed-",
-                  "command":"T-"
+                  "command":"TD"
                }
             ]
          }
