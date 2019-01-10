@@ -79,7 +79,6 @@ maxSpeedEnabled = False
 os.system("sudo modprobe bcm2835_wdt")
 os.system("sudo /usr/sbin/service watchdog start")
 
-
 # set volume level
 
 # tested for 3.5mm audio jack
@@ -102,7 +101,6 @@ print "info server:", infoServer
 tempDir = tempfile.gettempdir()
 print "temporary directory:", tempDir
 
-
 # motor controller specific intializations
 if commandArgs.type == 'none':
     pass
@@ -112,6 +110,7 @@ elif commandArgs.type == 'motor_hat':
     pass
 elif commandArgs.type == 'mebo2':
     from mebo.handle_mebo_command import handle_mebo_command
+    from mebo.handle_mebo_command import handle_speed
 elif commandArgs.type == 'gopigo2':
     import gopigo
 elif commandArgs.type == 'gopigo3':
@@ -908,8 +907,40 @@ def moveGoPiGo3(command):
         time.sleep(0.35)
         easyGoPiGo3.stop()
 
+meboMSpeedDict = {
+	'current':50,
+	'home':50,
+	'max': 150, #up
+	'min': 25 #down
+}
+meboTSpeedDict = {
+	'current':50,
+	'home':50,
+	'max': 150, #up
+	'min': 25 #down
+}
 
+def incrementMSpeed(amount):
+    meboMSpeedDict['current'] += amount
+
+    if meboMSpeedDict['current'] >= meboMSpeedDict['max']:
+        meboMSpeedDict['current'] = meboMSpeedDict['max']
+    if meboMSpeedDict['current'] <= meboMSpeedDict['min']:
+        meboMSpeedDict['current'] = meboMSpeedDict['min']
+
+    print "increment speed position: ", meboMSpeedDict['current']
+    handle_speed("S", meboMSpeedDict['current'])
     
+def incrementTSpeed(amount):
+    meboTSpeedDict['current'] += amount
+
+    if meboTSpeedDict['current'] >= meboTSpeedDict['max']:
+        meboTSpeedDict['current'] = meboTSpeedDict['max']
+    if meboTSpeedDict['current'] <= meboTSpeedDict['min']:
+        meboTSpeedDict['current'] = meboTSpeedDict['min']
+
+    print "increment turning position: ", meboTSpeedDict['current']
+    handle_speed("T", meboTSpeedDict['current'])
         
                 
 def handle_command(args):
@@ -981,6 +1012,18 @@ def handle_command(args):
                 moveAdafruitPWM(command)                
 			
             if commandArgs.type == 'mebo2':
+                if command == 'S+':
+                    incrementMSpeed(10)
+                    time.sleep(0.05)
+                if command == 'S-':
+                    incrementMSpeed(-10)
+                    time.sleep(0.05)
+                if command == 'T+':
+                    incrementMSpeed(10)
+                    time.sleep(0.05)
+                if command == 'T-':
+                    incrementMSpeed(-10)
+                    time.sleep(0.05)
                 handle_mebo_command(command)
             
             if commandArgs.type == 'gopigo2':
