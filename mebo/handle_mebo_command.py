@@ -22,7 +22,7 @@ def handle_speed(command, speed):
     
     mebo_command = converter.convert({
         "command": command,
-        "parameter": 0
+        "parameter": speed
     })
 
     mebo_command_stop = converter.convert({
