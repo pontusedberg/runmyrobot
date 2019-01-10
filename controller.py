@@ -1015,15 +1015,20 @@ def handle_command(args):
                 if command == 'S+':
                     incrementMSpeed(10)
                     time.sleep(0.05)
+                    return
                 if command == 'S-':
                     incrementMSpeed(-10)
                     time.sleep(0.05)
+                    return
                 if command == 'T+':
                     incrementTSpeed(10)
                     time.sleep(0.05)
+                    return
+                    return
                 if command == 'T-':
                     incrementTSpeed(-10)
                     time.sleep(0.05)
+                    return
                 handle_mebo_command(command)
             
             if commandArgs.type == 'gopigo2':
