@@ -907,6 +907,7 @@ def moveGoPiGo3(command):
         time.sleep(0.35)
         easyGoPiGo3.stop()
 
+##Add this to mebo constants?! why is it here in controllers
 meboMSpeedDict = {
 	'current':50,
 	'home':50,
