@@ -910,13 +910,13 @@ def moveGoPiGo3(command):
 meboMSpeedDict = {
 	'current':50,
 	'home':50,
-	'max': 100, #up
+	'max': 65, #up
 	'min': 25 #down
 }
 meboTSpeedDict = {
 	'current':50,
 	'home':50,
-	'max': 100, #up
+	'max': 65, #up
 	'min': 25 #down
 }
 
